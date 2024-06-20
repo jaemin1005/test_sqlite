@@ -1,8 +1,6 @@
 import Database from "better-sqlite3";
 import { IDataBase } from "./Interfaces/IDatabase";
 
-type QueryState = "INSERT" | "SELECT" | "CREATE" | "DELETE"
-
 export abstract class Sqlite implements IDataBase{
 
   /** 해당 프로퍼티로 직접 접근하면 X */
