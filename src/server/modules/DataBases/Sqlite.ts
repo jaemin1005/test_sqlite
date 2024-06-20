@@ -1,6 +1,8 @@
 import Database from "better-sqlite3";
 import { IDataBase } from "./Interfaces/IDatabase";
 
+type QueryState = "INSERT" | "SELECT" | "CREATE" | "DELETE"
+
 export abstract class Sqlite implements IDataBase{
 
   /** 해당 프로퍼티로 직접 접근하면 X */
@@ -11,16 +13,23 @@ export abstract class Sqlite implements IDataBase{
     this.Init();
   }
 
-  ExecQuery(query: string, params?: unknown[]){
+  ExecQuery<T>(query: string, params?: unknown[]) : T[] | null | Database.RunResult{
+    const exec = this.__db.prepare(query);
+    const upperQuery = query.toUpperCase();
 
-    if(params === undefined){
-      this.__db.exec(query);
-      return;
+    if(upperQuery.startsWith("SELECT")){
+      const result = params === undefined ? exec.all() : exec.all(params);
+      return result as T[]
     }
 
-    const exec = this.__db.prepare(query);
-    const result = exec.run(params);
-    return result;
+    else if(upperQuery.startsWith("UPDATE") || upperQuery.startsWith("DELETE") || upperQuery.startsWith("INSERT") || upperQuery.startsWith("CREATE")){
+      const result = params === undefined ? exec.run() : exec.run(params);
+      return result
+    }
+
+    else{
+      return null;
+    }
   }
 
   Init(){
